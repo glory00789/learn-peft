@@ -44,7 +44,12 @@ def load_model_and_tokenizer(model_name, use_gpu=False):
     model = AutoModelForCausalLM.from_pretrained(model_name)
 
     if use_gpu:
-        model.to("cuda")
+        if torch.cuda.is_available():
+            model.to("cuda")
+        elif torch.backends.mps.is_available():
+            model.to("mps")
+        else:
+            print("Warning: use_gpu=True but no GPU found, using CPU")
 
     if not tokenizer.chat_template:
         tokenizer.chat_template = """{% for message in messages %}
